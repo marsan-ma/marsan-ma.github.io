@@ -1,4 +1,155 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-14T15:07:56+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Marsan Ma’s info</title><subtitle>Marsan Ma's info</subtitle><entry><title type="html">Detailed explaination of the features and implementations about the chatbot in layman’s terms</title><link href="http://localhost:4000/more-detail-about-tensorflow-seq2seq-chatbot-in-layman-terms/" rel="alternate" type="text/html" title="Detailed explaination of the features and implementations about the chatbot in layman's terms" /><published>2016-10-12T00:00:00+09:00</published><updated>2016-10-12T00:00:00+09:00</updated><id>http://localhost:4000/more%20detail%20about%20tensorflow%20seq2seq%20chatbot%20in%20layman%20terms</id><content type="html" xml:base="http://localhost:4000/more-detail-about-tensorflow-seq2seq-chatbot-in-layman-terms/">&lt;h1 id=&quot;tensorflow-chatbot&quot;&gt;tensorflow chatbot&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-14T17:05:17+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Marsan Ma’s info</title><subtitle>Marsan Ma's info</subtitle><entry><title type="html">Ad Bid Simulator</title><link href="http://localhost:4000/ad-bid-simulator/" rel="alternate" type="text/html" title="Ad Bid Simulator" /><published>2020-03-11T00:00:00+09:00</published><updated>2020-03-11T00:00:00+09:00</updated><id>http://localhost:4000/ad-bid-simulator</id><content type="html" xml:base="http://localhost:4000/ad-bid-simulator/">&lt;h2 id=&quot;intro&quot;&gt;Intro&lt;/h2&gt;
+
+&lt;p&gt;Ad is the major monetizing product for many companies. Here I’ll introduce how I build the simulator to evaluate and develop the ad system in indeed.&lt;/p&gt;
+
+&lt;p&gt;Here’s the slide:&lt;/p&gt;
+
+&lt;center&gt;
+&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/jV3bl7ZSiGpZp6&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot; scrolling=&quot;no&quot; style=&quot;border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;&quot; allowfullscreen=&quot;&quot;&gt; &lt;/iframe&gt; &lt;div style=&quot;margin-bottom:5px&quot;&gt; &lt;strong&gt; &lt;a href=&quot;//www.slideshare.net/marsanmars/ad-science-bid-simulator-public-ver-229698886&quot; title=&quot;Ad science bid simulator (public ver)&quot; target=&quot;_blank&quot;&gt;Ad science bid simulator (public ver)&lt;/a&gt; &lt;/strong&gt; from &lt;strong&gt;&lt;a href=&quot;https://www.slideshare.net/marsanmars&quot; target=&quot;_blank&quot;&gt;Marsan Ma&lt;/a&gt;&lt;/strong&gt; &lt;/div&gt;
+&lt;/center&gt;
+
+&lt;h2 id=&quot;the-difference-of-dsp-and-when-you-own-the-whole-system&quot;&gt;The difference of DSP and “when you own the whole system”&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/ad1.png&quot; alt=&quot;ad1&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;When you’re just a DSP company, you could treat the external world like they’re static, and do your A/B test normally. Since your effort to the whole bidding world is tiny, your algorithm change cannot really change the whole bidding eco-sysyem hugely.&lt;/p&gt;
+
+&lt;p&gt;But when you own the system, things are very different: whatever your algorithm change, it will ramp-up to 100%, and it will change the world — which means what you see in 1% A/B test will be different as you ramp-up.&lt;/p&gt;
+
+&lt;p&gt;While we separate ads into control and treatment groups and bid with old and new bidding algorithm accordingly, they’re still bid together, so they &lt;em&gt;will have network effect&lt;/em&gt;. Besides, ad product always has terrible seasonality concerns, making online test volatile.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/ad2.png&quot; alt=&quot;ad2&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/ad3.png&quot; alt=&quot;ad3&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/ad4.png&quot; alt=&quot;ad4&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/ad5.png&quot; alt=&quot;ad5&quot; /&gt;&lt;/p&gt;</content><author><name></name></author><category term="ad" /><category term="bidder algorithm" /><category term="simulator" /><summary type="html">Ad is the major monetizing product for many companies. Here I'll introduce how I build the simulator to evaluate and develop the ad system in indeed.</summary></entry><entry><title type="html">Item Embedding in Recommendation with Item2vec &amp;amp; Siamese-CNN</title><link href="http://localhost:4000/item-embedding-in-recommendation/" rel="alternate" type="text/html" title="Item Embedding in Recommendation with Item2vec &amp; Siamese-CNN" /><published>2019-08-28T00:00:00+09:00</published><updated>2019-08-28T00:00:00+09:00</updated><id>http://localhost:4000/item-embedding-in-recommendation</id><content type="html" xml:base="http://localhost:4000/item-embedding-in-recommendation/">&lt;h2 id=&quot;intro&quot;&gt;Intro&lt;/h2&gt;
+
+&lt;p&gt;This is a post about one of my favorite project: a deep learning recommendation system learn from both user-behavior and item context. The main credit of this system is that:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;It’s a single system learn from both user behavior &amp;amp; item context, thus good in both accuracy and recall, and immune from cold-start.&lt;/li&gt;
+  &lt;li&gt;To predict with MM level itemXuser combinations, we designed a special architecture to make online prediction super cheap by leveraging ANN (approximate nearest neighborhood).&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Here’s the slide:&lt;/p&gt;
+
+&lt;center&gt;
+&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/1n6XYyMVCxqdc3&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot; scrolling=&quot;no&quot; style=&quot;border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;&quot; allowfullscreen=&quot;&quot;&gt; &lt;/iframe&gt; &lt;div style=&quot;margin-bottom:5px&quot;&gt; &lt;strong&gt; &lt;a href=&quot;//www.slideshare.net/marsanmars/universal-job-embedding-in-recommendation-public-ver-211934555&quot; title=&quot;Universal job embedding in recommendation (public ver.)&quot; target=&quot;_blank&quot;&gt;Universal job embedding in recommendation (public ver.)&lt;/a&gt; &lt;/strong&gt; from &lt;strong&gt;&lt;a href=&quot;//www.slideshare.net/marsanmars&quot; target=&quot;_blank&quot;&gt;Marsan Ma&lt;/a&gt;&lt;/strong&gt; &lt;/div&gt;
+&lt;/center&gt;
+
+&lt;h2 id=&quot;architecture&quot;&gt;Architecture&lt;/h2&gt;
+
+&lt;p&gt;The whole architecture is like this. It looks fancy, and took me quite a lot of effort struggling through whole bunch of infra troubles, LOL.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/reco1.png&quot; alt=&quot;Architecture&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;key-concept&quot;&gt;Key concept&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;Learn user behavior through a graph model: [item2vec with global context][ref1], which is the 2018 best paper proposed by AirBnb.&lt;/li&gt;
+  &lt;li&gt;Extend this template converting user session to binary classification, use &lt;a href=&quot;https://en.wikipedia.org/wiki/Siamese_neural_network&quot;&gt;siamese-network&lt;/a&gt; to learn from item context.&lt;/li&gt;
+  &lt;li&gt;On production for predicting on the fly, we use cached item-embeddings and user-embeddings calculated offline to do the prediction, this largely reduced the computing complexity, making neural network model results could be used online for millions users x millions items scale product.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;item2vec&quot;&gt;Item2Vec&lt;/h2&gt;
+
+&lt;p&gt;This model actually comes from word2vec, just treat the user session as a sentence and each item visited as a work token, then you could apply the skip-gram model like work2vec.&lt;/p&gt;
+
+&lt;p&gt;After all, the item2vec helped us transfering the recommendation problem into a binary classification problem. The training process is actually a way to formulate the item embeddings and define the “distance” among items.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/reco2.png&quot; alt=&quot;Item2vec&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Airbnb improved this model by introducing the idea of “global context”, which enable us to treat clicks event and paying event in different weight. Since this two kinds of user behavior is having very different level of interest to the item.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/reco3.png&quot; alt=&quot;Item2vec with Global Context&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;siamese-network&quot;&gt;Siamese Network&lt;/h2&gt;
+
+&lt;p&gt;Finally, with the help of item2vec concept, we could switch the binary classification with siamese-network, so we could also incorporate with item context into our model. That’s how we learn from both user-behavior and item-context in a model, end-to-end.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/reco4.png&quot; alt=&quot;Siamese&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Here I use cnn as the encoder, since its fast and having good performance. Feel free to switch the encoder to any fancier stuff if you have enough budget for the extra computing power :p&lt;/p&gt;</content><author><name></name></author><category term="recommend system" /><category term="siamese network" /><category term="item2vec" /><category term="nlp" /><category term="deep learning" /><category term="neural network" /><category term="cnn" /><summary type="html">Item Embedding is the new standard for recommend-system. Here I'm gonna introduce how I use both Item2vec and Siamese Network to build recommendation models learn from both item content and user behavior.</summary></entry><entry><title type="html">TextCNN on UGC (user generated content) moderation</title><link href="http://localhost:4000/text-cnn-on-ugc-moderation/" rel="alternate" type="text/html" title="TextCNN on UGC (user generated content) moderation" /><published>2018-07-18T00:00:00+09:00</published><updated>2018-07-18T00:00:00+09:00</updated><id>http://localhost:4000/text-cnn-on-ugc-moderation</id><content type="html" xml:base="http://localhost:4000/text-cnn-on-ugc-moderation/">&lt;h2 id=&quot;intro&quot;&gt;Intro&lt;/h2&gt;
+&lt;p&gt;TextCNN is a good case demonstrating how neural-network could not only learn from the data, but also do the feature extraction for us.&lt;/p&gt;
+
+&lt;p&gt;In Indeed we got bunch of text data from our user, like resume, job-description, company related content like reviews and Q&amp;amp;A. These user-generated-content is our most valuable asset. To help people get good jobs we’re constantly trying better way to learn more from these text data.&lt;/p&gt;
+
+&lt;p&gt;Here’s the slide:&lt;/p&gt;
+
+&lt;center&gt;
+&lt;iframe src=&quot;//www.slideshare.net/slideshow/embed_code/key/w89wo7k3FIzo8C&quot; width=&quot;595&quot; height=&quot;485&quot; frameborder=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot; scrolling=&quot;no&quot; style=&quot;border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;&quot; allowfullscreen=&quot;&quot;&gt; &lt;/iframe&gt; &lt;div style=&quot;margin-bottom:5px&quot;&gt; &lt;strong&gt; &lt;a href=&quot;//www.slideshare.net/marsanmars/text-cnn-on-acme-ugc-moderation&quot; title=&quot;Text cnn on acme ugc moderation&quot; target=&quot;_blank&quot;&gt;Text cnn on acme ugc moderation&lt;/a&gt; &lt;/strong&gt; from &lt;strong&gt;&lt;a href=&quot;//www.slideshare.net/marsanmars&quot; target=&quot;_blank&quot;&gt;Marsan Ma&lt;/a&gt;&lt;/strong&gt; &lt;/div&gt;
+&lt;/center&gt;
+
+&lt;h2 id=&quot;the-concept-of-textcnn&quot;&gt;The concept of TextCNN&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;taking the concatenated word embeddings of a sentence or article as pixels&lt;/li&gt;
+  &lt;li&gt;use filters to learn extracting features out of them&lt;/li&gt;
+  &lt;li&gt;then use a max-pooling layer to aggregate all the features&lt;/li&gt;
+  &lt;li&gt;Finally, learn from those features by the final fully-connected layers.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;if-you-prefer-it-explained-in-code&quot;&gt;If you prefer it explained in code&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/textcnn_code.png&quot; alt=&quot;TextCNN Code&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Let’s say we limit our input paragraph length as 140 words.&lt;/p&gt;
+
+&lt;p&gt;For the parameters of embedding layer, 60k is the number of top words I usually use for learning English, which means we’re using a English dictionary only contains 60k most frequently used words.
+But I think it’s more like a upper-bound, you could really start with 10k or 30k should be fine.&lt;/p&gt;
+
+&lt;p&gt;The embedding dimension is 300 because I use the pre-trained embedding “FastText” trained from wiki data by Facebook in 2017. 
+Again it’s also a pretty large one, you could find GloVe which is in 128 dimension. I prefer FastText just because I like new stuff, and the idea behind it is fancy.&lt;/p&gt;
+
+&lt;p&gt;If you wanna try your own embedding, there is a &lt;a href=&quot;https://developers.googleblog.com/2017/11/introducing-tensorflow-feature-columns.html&quot;&gt;rule-of-thumb in a 2017 Google Blog&lt;/a&gt; saying It’s better be the 4th root of your dictionary size.
+I have no luck on training it myself and beat using pre-trained one, so I don’t know whether it’s a good rule. But people say you could try from 64 to 1024.&lt;/p&gt;
+
+&lt;p&gt;Then for the filters, we got 3 different stride size: [2, 3, 4]. So for each of them we have corresponding 1d-convolution layer with 2 filters, and the MaxPool layer is just taking maximum value from convolution result.&lt;/p&gt;
+
+&lt;p&gt;Finally all the output of MaxPool layer will be concatenated into a vector, learn by the final multi-layer-perceptron.&lt;/p&gt;
+
+&lt;p&gt;The dropout probability being 0.5 because Hinton said so. Usually it likely being the best or close to. (Except those very aggressive dropout like input dropout or embedding dropout.)&lt;/p&gt;
+
+&lt;h2 id=&quot;next-steps&quot;&gt;Next steps&lt;/h2&gt;
+
+&lt;p&gt;Now you know TextCNN, but one of the merit of neural network architecture is, you could easily combine different models and make them trained together.&lt;/p&gt;
+
+&lt;p&gt;For example if you feel the jobTitle out of resume is something worth emphasizing on, you could make a dedicated TextCNN model and concatenate the vector before the final multi-layer-perceptron, and then learn from this large vector like they’re all extracted features from different models.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/textcnn_ex1.png&quot; alt=&quot;TextCNN Code&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Also, if you feel you’re so good at feature engineering and pretty sure you have some feature that model just can’t be better than you. You could also concatenate your manual crafted features into this big feature vector, make them learned together.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/textcnn_ex2.png&quot; alt=&quot;TextCNN Code&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;why-you-should-try-it&quot;&gt;Why you should try it&lt;/h2&gt;
+
+&lt;p&gt;First, we’re expecting it brings good performance, since mostly n-gram usually would be the main feature for learning from text, and TextCNN is doing a much better job than n-gram.&lt;/p&gt;
+
+&lt;p&gt;It’s using embedding so the resolution is much better than word level, and it works not just the exact same words, but also for similar meaning words. And it’s training these feature-learning process, including the embedding and convolution filters during the supervised-learning process to make them specifically fit your data, your purpose.&lt;/p&gt;
+
+&lt;p&gt;Also since we’re not doing feature extraction by ourself, we don’t need to explicitly doing them while deploying. Thus we save both the develop time and the computing cost of feature extracting. Besides many fancy features, for examples like features comes from unsupervised learning methods like LDA, NMF, or some indirect usage of embeddings.&lt;/p&gt;
+
+&lt;p&gt;Finally you could steal from the giants by using the pretrained embeddings like word2vec, Glove or FastText. It could give you a boost, and especially helpful if you just don’t really got at least millions of samples to learn the embedding all by yourself.&lt;/p&gt;
+
+&lt;p&gt;Also, there are some merits natively comes from it just because it’s neural network model.&lt;/p&gt;
+
+&lt;p&gt;Previously if we want to train an ensemble model, you have to use some indirect ways like saving all the cross-validation results and make them as input of the 2nd pipeline model to train on their outputs.&lt;/p&gt;
+
+&lt;p&gt;In neural network you could ensemble whatever layers you like into one graph, and just train them together from the very beginning. Like, if you just can’t decide you want use RNN or CNN, you could encode your text data by both of them and concatenate them together!&lt;/p&gt;
+
+&lt;h2 id=&quot;deployment-in-java&quot;&gt;Deployment in Java&lt;/h2&gt;
+
+&lt;p&gt;The keras model, while backed by tensorflow, could be dumped as tensorflow graph and imported in Java. So you don’t need to deploy it as a service in python, then called by Java and worry about handling the exceptions of communication or service accessibility or reliability.&lt;/p&gt;
+
+&lt;p&gt;And the Java code is super easy, like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/img/blog/textcnn_ex3.png&quot; alt=&quot;TextCNN Deploy&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;1st you import the model in one line.
+2nd you give it the input, which is the tokenized text.
+3rd you get the predicted results, and this prediction could be called in batch.&lt;/p&gt;
+
+&lt;p&gt;That’s all. Everything is maintained in-process, no feature engineering, no http or boxcar request.&lt;/p&gt;</content><author><name></name></author><category term="nlp" /><category term="deep learning" /><category term="neural network" /><category term="cnn" /><summary type="html">TextCNN is my new standard for quick-and-dirty fast NLP model building, it's fast and simple, natively include feature engineering as model and trained together.</summary></entry><entry><title type="html">Detailed explaination of the features and implementations about the chatbot in layman’s terms</title><link href="http://localhost:4000/more-detail-about-tensorflow-seq2seq-chatbot-in-layman-terms/" rel="alternate" type="text/html" title="Detailed explaination of the features and implementations about the chatbot in layman's terms" /><published>2016-10-12T00:00:00+09:00</published><updated>2016-10-12T00:00:00+09:00</updated><id>http://localhost:4000/more%20detail%20about%20tensorflow%20seq2seq%20chatbot%20in%20layman%20terms</id><content type="html" xml:base="http://localhost:4000/more-detail-about-tensorflow-seq2seq-chatbot-in-layman-terms/">&lt;h1 id=&quot;tensorflow-chatbot&quot;&gt;tensorflow chatbot&lt;/h1&gt;
 
 &lt;h3 id=&quot;with-seq2seq--attention--dict-compress--beam-search--anti-lm--deep-reinforcement-learning--facebook-messenger-server&quot;&gt;(with seq2seq + attention + dict-compress + beam search + anti-LM + deep reinforcement learning + facebook messenger server)&lt;/h3&gt;
 
@@ -572,86 +723,4 @@ some convention functions handling time format and dataframe&lt;/li&gt;
 
 &lt;h3 id=&quot;about-dataflow&quot;&gt;About dataflow&lt;/h3&gt;
 
-&lt;p&gt;Here I tried to separate data pipelines into independent stages. Like, you could change input data format without refactoring the learning models or evaluation stages, and vice versa. Senior Kagglers might find this project get an overkill big structure, that’s because this framework try to become a generic framework for any kinds of data science products.&lt;/p&gt;</content><author><name></name></author><category term="machine learning" /><category term="logistic regression" /><category term="random forest" /><category term="svm" /><category term="blending model" /><category term="kaggle" /><category term="dato" /><summary type="html">It's my code doing the Data Kaggle challenge. In this challenge, we are requested to develop a system predicting whether an article is a native advertisement. It’s involves lots of natural language processing tricks, like boilerplate removing, topic modeling and embedding techniques.</summary></entry><entry><title type="html">Coconut CMS</title><link href="http://localhost:4000/coconut-a-ruby-on-rails-content-management-platform/" rel="alternate" type="text/html" title="Coconut CMS" /><published>2015-08-01T00:00:00+09:00</published><updated>2015-08-01T00:00:00+09:00</updated><id>http://localhost:4000/coconut%20-%20a%20ruby%20on%20rails%20content%20management%20platform</id><content type="html" xml:base="http://localhost:4000/coconut-a-ruby-on-rails-content-management-platform/">&lt;h1 id=&quot;coconuts-cms&quot;&gt;Coconuts CMS&lt;/h1&gt;
-
-&lt;p&gt;It’s a content management platform in Ruby on Rails, the repository:&lt;br /&gt;
-&lt;a href=&quot;https://github.com/Marsan-Ma/coconuts&quot;&gt;https://github.com/Marsan-Ma/coconuts&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;part-0--environment-setup-problem&quot;&gt;Part 0 : Environment setup problem&lt;/h2&gt;
-&lt;ol&gt;
-  &lt;li&gt;bundle install problem: mysql.h is missing, solution:&lt;br /&gt;
- &lt;a href=&quot;http://stackoverflow.com/questions/5919727/bundle-install-problem-mysql-h-is-missing&quot;&gt;http://stackoverflow.com/questions/5919727/bundle-install-problem-mysql-h-is-missing&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;part-1--server-boot-up-problem&quot;&gt;Part 1 : Server boot-up problem&lt;/h2&gt;
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;Nginx not auto start-up problem
-=&amp;gt; port 80 blocked by apache2 by default, see &lt;code class=&quot;highlighter-rouge&quot;&gt;ps ax | grep apache2&lt;/code&gt;
-=&amp;gt; modify &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/apache2/ports.conf&lt;/code&gt; and delete &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/apache2/sites-enabled/000-default&lt;/code&gt;
-=&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo update-rc.d nginx defaults&lt;/code&gt; to add service to auto-start list
-=&amp;gt; if do not want to reboot, kill apache process by ‘sudo kill -9 &lt;pid&gt;' then 'sudo service nginx start'&lt;/pid&gt;&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Sidekiq auto start-up # (X: not yet success …)
-=&amp;gt; download sidekiq.conf &amp;amp; workers.conf from &lt;a href=&quot;https://github.com/mperham/sidekiq/tree/master/examples/upstart&quot;&gt;https://github.com/mperham/sidekiq/tree/master/examples/upstart&lt;/a&gt;
-=&amp;gt; move them to &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/init.d/sidekiq&lt;/code&gt; &amp;amp; &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/init.d/workers&lt;/code&gt;, then &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo update-rc.d _____ defaults&lt;/code&gt;&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;part-2--background-tasks-sidekiq--redis--whenever&quot;&gt;Part 2 : Background tasks (Sidekiq + Redis + Whenever)&lt;/h2&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sidekiq&lt;/code&gt;       # start sidekiq, or ‘bundle exec sidekiq … -L log/sidekiq.log &amp;amp;’, add   ‘xvfb-run’ in front while at cloud server, see part 3&lt;br /&gt;
-&lt;code class=&quot;highlighter-rouge&quot;&gt;whenever -i&lt;/code&gt;   # reload scheduled task settings&lt;br /&gt;
-&lt;code class=&quot;highlighter-rouge&quot;&gt;crontab -e&lt;/code&gt;    # edit unix cron-tab for scheduled tasks&lt;br /&gt;
-config in &lt;code class=&quot;highlighter-rouge&quot;&gt;config/sidekiq.yml&lt;/code&gt; &amp;amp; &lt;code class=&quot;highlighter-rouge&quot;&gt;config/schedule.rb&lt;/code&gt;&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Job queue but not processed =&amp;gt; sidekiq haven’t start.&lt;/li&gt;
-  &lt;li&gt;Job failed =&amp;gt; user password error / 
-              wordpress json-api create-post not enabled / 
-              db host not grant access /&lt;/li&gt;
-  &lt;li&gt;Redis-server has not enabled / check by &lt;code class=&quot;highlighter-rouge&quot;&gt;redis-cli ping&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;try flushall redis-cli keys, or directly edit crontab, remove unused one.&lt;/li&gt;
-  &lt;li&gt;add in &lt;code class=&quot;highlighter-rouge&quot;&gt;config/schedule.rb&lt;/code&gt; =&amp;gt; set &lt;code class=&quot;highlighter-rouge&quot;&gt;:job_template, &quot;bash -l -i -c ':job'&quot;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;don’t leave any ‘puts’ in background script, will cause error while no login shell.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;part-3--about-capybara-the-pseudo-browser&quot;&gt;Part 3 : About Capybara, the pseudo browser&lt;/h2&gt;
-
-&lt;h4 id=&quot;qt-packages-needed&quot;&gt;QT packages needed&lt;/h4&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install libqt4-dev libqtwebkit-dev&lt;/code&gt;&lt;/p&gt;
-&lt;h4 id=&quot;in-cloud-server-for-solving-no-display-session-problem&quot;&gt;in cloud server, for solving no display session problem&lt;/h4&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install xvfb libicu48&lt;/code&gt;&lt;/p&gt;
-&lt;h4 id=&quot;than-add-this-lin-export-displaylocalhost10-in-bash_profile-and-start-any-command-need-display-session-by-xvfb-run&quot;&gt;than add this lin &lt;code class=&quot;highlighter-rouge&quot;&gt;export DISPLAY=localhost:1.0&lt;/code&gt; in &lt;code class=&quot;highlighter-rouge&quot;&gt;~/.bash_profile&lt;/code&gt; and start any command need display session by &lt;code class=&quot;highlighter-rouge&quot;&gt;xvfb-run&lt;/code&gt;&lt;/h4&gt;
-&lt;p&gt;Ex: ‘xvfb-run bundle exec sidekiq … -L log/sidekiq.log &amp;amp;’&lt;/p&gt;
-
-&lt;h2 id=&quot;part-4--mongoid--redis-database-backup-and-feedback&quot;&gt;Part 4 : Mongoid &amp;amp; Redis Database backup and feedback&lt;/h2&gt;
-
-&lt;h4 id=&quot;mongoid-database&quot;&gt;MONGOID database&lt;/h4&gt;
-
-&lt;h4 id=&quot;dump-selected-database-in-current-path&quot;&gt;Dump selected database in current path&lt;/h4&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;mongodump --db &amp;lt;db_name&amp;gt;&lt;/code&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;drop-database-to-clean-all&quot;&gt;Drop database to clean all&lt;/h4&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;mongo &amp;lt;db_name&amp;gt; --eval &quot;db.dropDatabase()&quot;&lt;/code&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;recover-selected-database-from-assigned-path&quot;&gt;Recover selected database from assigned path&lt;/h4&gt;
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;mongorestore --db &amp;lt;db_name&amp;gt; ./dump/&amp;lt;db_name&amp;gt;/&lt;/code&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;redis-database&quot;&gt;REDIS database&lt;/h4&gt;
-&lt;p&gt;Dump redis all (need Gem redis-dump)
-&lt;code class=&quot;highlighter-rouge&quot;&gt;redis-dump &amp;gt; ./dump/&amp;lt;db_name&amp;gt;_redis.json&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Clean all
-&lt;code class=&quot;highlighter-rouge&quot;&gt;redis-cli flushall&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Restore from json
-&lt;code class=&quot;highlighter-rouge&quot;&gt;cat ./dump/&amp;lt;db_name&amp;gt;_redis.json | redis-load&lt;/code&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;redis-on-mac&quot;&gt;Redis on MAC&lt;/h4&gt;
-&lt;p&gt;To have launchd start redis at login:&lt;br /&gt;
-    &lt;code class=&quot;highlighter-rouge&quot;&gt;ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents&lt;/code&gt;&lt;br /&gt;
-Then to load redis now:&lt;br /&gt;
-    &lt;code class=&quot;highlighter-rouge&quot;&gt;launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist&lt;/code&gt;&lt;br /&gt;
-Or, if you don’t want/need launchctl, you can just run:&lt;br /&gt;
-    &lt;code class=&quot;highlighter-rouge&quot;&gt;redis-server /usr/local/etc/redis.conf&lt;/code&gt;&lt;/p&gt;</content><author><name></name></author><category term="machine learning" /><category term="logistic regression" /><category term="random forest" /><category term="svm" /><category term="blending model" /><category term="kaggle" /><category term="facebook" /><summary type="html">My content management system written in Ruby on Rails</summary></entry></feed>
+&lt;p&gt;Here I tried to separate data pipelines into independent stages. Like, you could change input data format without refactoring the learning models or evaluation stages, and vice versa. Senior Kagglers might find this project get an overkill big structure, that’s because this framework try to become a generic framework for any kinds of data science products.&lt;/p&gt;</content><author><name></name></author><category term="machine learning" /><category term="logistic regression" /><category term="random forest" /><category term="svm" /><category term="blending model" /><category term="kaggle" /><category term="dato" /><summary type="html">It's my code doing the Data Kaggle challenge. In this challenge, we are requested to develop a system predicting whether an article is a native advertisement. It’s involves lots of natural language processing tricks, like boilerplate removing, topic modeling and embedding techniques.</summary></entry></feed>
