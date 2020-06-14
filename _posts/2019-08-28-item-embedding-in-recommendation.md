@@ -12,7 +12,7 @@ tag:
 - deep learning
 - neural network
 - cnn
-feature: /assets/img/blog/reco1.png
+feature: assets/img/blog/reco1.png
 comments: true
 ---
 

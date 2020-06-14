@@ -8,7 +8,7 @@ tag:
 - ad
 - bidder algorithm
 - simulator
-feature: https://marsan-ma.github.io/assets/img/blog/ad3.png
+feature: assets/img/blog/ad3.png
 comments: true
 ---
 
