@@ -9,7 +9,7 @@ tag:
 - deep learning
 - neural network
 - cnn
-feature: /assets/img/blog/textcnn.png
+feature: https://marsan-ma.github.io/assets/img/blog/textcnn.png
 comments: true
 ---
 
