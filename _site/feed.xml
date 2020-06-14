@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.7">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-14T15:07:56+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Marsan Ma’s info</title><subtitle>Marsan Ma's info</subtitle><entry><title type="html">Detailed explaination of the features and implementations about the chatbot in layman’s terms</title><link href="http://localhost:4000/more-detail-about-tensorflow-seq2seq-chatbot-in-layman-terms/" rel="alternate" type="text/html" title="Detailed explaination of the features and implementations about the chatbot in layman's terms" /><published>2016-10-12T00:00:00+09:00</published><updated>2016-10-12T00:00:00+09:00</updated><id>http://localhost:4000/more%20detail%20about%20tensorflow%20seq2seq%20chatbot%20in%20layman%20terms</id><content type="html" xml:base="http://localhost:4000/more-detail-about-tensorflow-seq2seq-chatbot-in-layman-terms/">&lt;h1 id=&quot;tensorflow-chatbot&quot;&gt;tensorflow chatbot&lt;/h1&gt;
+
+&lt;h3 id=&quot;with-seq2seq--attention--dict-compress--beam-search--anti-lm--deep-reinforcement-learning--facebook-messenger-server&quot;&gt;(with seq2seq + attention + dict-compress + beam search + anti-LM + deep reinforcement learning + facebook messenger server)&lt;/h3&gt;
+
+&lt;p&gt;Github Repository: &lt;a href=&quot;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm&quot;&gt;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Here I’ll try to explain some algorithm and implementation details about &lt;a href=&quot;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm&quot;&gt;this work&lt;/a&gt; in layman’s terms.&lt;/p&gt;
+
+&lt;h2 id=&quot;sequence-to-sequence-model&quot;&gt;Sequence to sequence model&lt;/h2&gt;
+
+&lt;h3 id=&quot;what-is-a-language-model&quot;&gt;What is a language model?&lt;/h3&gt;
+
+&lt;p&gt;Let’s say a language model is … &lt;br /&gt;
+a) Trained by a lot of corpus.&lt;br /&gt;
+b) It could predict the &lt;strong&gt;probability of next word&lt;/strong&gt; given foregoing words.&lt;br /&gt;
+=&amp;gt; It’s just conditional probability, &lt;strong&gt;P(next_word | foregoing_words)&lt;/strong&gt;&lt;br /&gt;
+c) Since we could predict next word: &lt;br /&gt;
+=&amp;gt; then predict even next, according to words just been generated&lt;br /&gt;
+=&amp;gt; continuously, we could produce sentences, even paragraph.&lt;/p&gt;
+
+&lt;p&gt;We could easily achieve this by simple &lt;a href=&quot;http://colah.github.io/posts/2015-08-Understanding-LSTMs&quot;&gt;LSTM model&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-seq2seq-model-architecture&quot;&gt;The seq2seq model architecture&lt;/h3&gt;
+
+&lt;p&gt;Again we quote this seq2seq architecture from [Google’s blogpost]
+&lt;a href=&quot;http://googleresearch.blogspot.ru/2015/11/computer-respond-to-this-email.html&quot;&gt;&lt;img src=&quot;http://4.bp.blogspot.com/-aArS0l1pjHQ/Vjj71pKAaEI/AAAAAAAAAxE/Nvy1FSbD_Vs/s640/2TFstaticgraphic_alt-01.png&quot; alt=&quot;seq2seq&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;It’s composed of two language model: encoder and decoder. Both of them could be LSTM model we just mentioned.&lt;/p&gt;
+
+&lt;p&gt;The encoder part accept input tokens and transform the whole input sentence into an embedding &lt;strong&gt;“thought vector”&lt;/strong&gt;, which express the meaning of input sentence in our language model domain.&lt;/p&gt;
+
+&lt;p&gt;Then the decoder is just a language model, like we just said, a language model could generate new sentence according to foregoing corpus. Here we use this &lt;strong&gt;“thought vector”&lt;/strong&gt; as kick-off and receive the corresponding mapping, and decode it into the response.&lt;/p&gt;
+
+&lt;h3 id=&quot;reversed-encoder-input-and-attention-mechanism&quot;&gt;Reversed encoder input and Attention mechanism&lt;/h3&gt;
+
+&lt;p&gt;Now you might wonder:&lt;br /&gt;
+a) Considering this architecture, wil the “thought vector” be dominated by later stages of encoder?&lt;br /&gt;
+b) Is that enough to represent the meaning of whole input sentence into just a vector?&lt;/p&gt;
+
+&lt;p&gt;For (a) actually, one of the implement detail we didn’t mention before: the input sentence will be reversed before input to the encoder. Thus we shorten the distance between head of input sentence and head of response sentence. Empirically, it achieves better results. (This trick is not shown in the architecture figure above, for easy to understanding)&lt;/p&gt;
+
+&lt;p&gt;For (b), another methods to disclose more information to decoder is the &lt;a href=&quot;http://arxiv.org/abs/1412.7449&quot;&gt;attention mechanism&lt;/a&gt;. The idea is simple: allowing each stage in decoder to peep any encoder stages, if they found useful in training phase. So decoder could understand the input sentence more and automagically peep suitable positions while generating response.&lt;/p&gt;
+
+&lt;h2 id=&quot;techniques-about-language-model&quot;&gt;Techniques about language model&lt;/h2&gt;
+
+&lt;h3 id=&quot;dictionary-space-compressing-and-projection&quot;&gt;Dictionary space compressing and projection&lt;/h3&gt;
+
+&lt;p&gt;A naive implementation of language model is: suppose we are training english language model, which a dictionary size of 80,000 is roughly enough. As we one-hot coding each word in our dictionary, our LSTM cell should have 80,000 outputs and we will do the softmax to choose for words with best probability…&lt;/p&gt;
+
+&lt;p&gt;… even if you have lots of computing resource, you don’t need to waste like that. Especially if you are dealing with some other languages with more words like Chinese, which 200,000 words is barely enough.&lt;/p&gt;
+
+&lt;p&gt;Practically, we could reduce this 80,000 one-hot coding dictionary into embedding spaces, we could use like 64, 128 or 256 dimention to embed our 80,000 words dictionary, and train our model with only by this lower dimention. Then finally when we are generating the response, we project the embedding back into one-hot coding space for dictionary lookup.&lt;/p&gt;
+
+&lt;h3 id=&quot;beam-search&quot;&gt;Beam search&lt;/h3&gt;
+
+&lt;p&gt;The original implementation of tensorflow decode response sentence greedily. Empirically this trapped result in local optimum, and result in dump response which do have maximum probability in first couple of words.&lt;/p&gt;
+
+&lt;p&gt;So we do the beam search, keep best N candidates and move-forward, thus we could avoid local optimum and find more longer, interesting responses more closer to global optimum result.&lt;/p&gt;
+
+&lt;p&gt;In &lt;a href=&quot;http://arxiv.org/abs/1412.7449&quot;&gt;this paper&lt;/a&gt;, Google Brain team found that beam search didn’t benefit a lot in machine translation, I guess that’s why they didn’t implement beam search. But in my experience, chatbot do benefit a lot from beam search.&lt;/p&gt;
+
+&lt;h2 id=&quot;anti-language-model&quot;&gt;Anti-Language Model&lt;/h2&gt;
+
+&lt;h3 id=&quot;generic-response-problem&quot;&gt;Generic response problem&lt;/h3&gt;
+
+&lt;p&gt;As the seq2seq model is trained by &lt;a href=&quot;https://en.wikipedia.org/wiki/Maximum_likelihood_estimation&quot;&gt;MLE&lt;/a&gt; (maximum likelyhood estimation), the model do follow this object function by finding the “most possible” response well. But in human dialogue, a response with high probability like “thank you”, “I don’t know”, “I love you” is not informative at all.&lt;/p&gt;
+
+&lt;p&gt;As currently we haven’t find a good enough object function to replace MLE, there are some works to suppress this “generic response problem”.&lt;/p&gt;
+
+&lt;h3 id=&quot;supressing-generic-response&quot;&gt;Supressing generic response&lt;/h3&gt;
+
+&lt;p&gt;The work of &lt;a href=&quot;https://arxiv.org/abs/1606.01541&quot;&gt;Li. et al&lt;/a&gt; from Stanford and Microsoft Research try to suppress generic response by lower the probability of generic response from candidates while doing the beam search.&lt;/p&gt;
+
+&lt;p&gt;The idea is somewhat like Tf-Idf: if this response is suitable for all kinds of foregoing sentence, which means it’s not specific answer for current sentence, then we discard it.&lt;/p&gt;
+
+&lt;p&gt;According my own experiment result, this helps a lot! Although the cost is that we will choose something grammatically not so correct, but most of time the effect is acceptable. It does generate more interesting, informative response.&lt;/p&gt;
+
+&lt;h2 id=&quot;deep-reinforcement-learning&quot;&gt;Deep Reinforcement Learning&lt;/h2&gt;
+
+&lt;h3 id=&quot;reinforcement-learning&quot;&gt;Reinforcement learning&lt;/h3&gt;
+
+&lt;p&gt;Reinforcement learning is a promising domain now (in 2016). It’s promising because it solve the delayed reward problem, and that’s a huge merit for chatbot training. Since we could judge a continuous dialogue includeing several sentences, rather than one single sentence at a time. We could design more sophiscated metrics to reward the model and make it learn more abstract ideas.&lt;/p&gt;
+
+&lt;h3 id=&quot;implement-tricks-in-tensorflow&quot;&gt;Implement tricks in tensorflow&lt;/h3&gt;
+
+&lt;p&gt;The magic of tensorflow is that it construct a graph, which all the computing in graph could be dispatched automagically to CPU, GPU, or even distributed system (more CPU/GPU).&lt;/p&gt;
+
+&lt;p&gt;So far tensorflow have no native supporting operations for the delayed rewarding, so we have to do some work-around. We will calculate the gradients in graph, and accumulate and do post-processing to them out-of-graph, finally inject them back to do the &lt;code class=&quot;highlighter-rouge&quot;&gt;apply_gradient()&lt;/code&gt;. You could find a minimum example in &lt;a href=&quot;https://github.com/awjuliani/DeepRL-Agents/blob/master/Policy-Network.ipynb&quot;&gt;this ipython notebook&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="chatbot" /><category term="deep learning" /><category term="neural network" /><category term="rnn" /><summary type="html">Here I will try to explain some algorithm and implementation details about the work &quot;the tensroflow chatbot&quot; in layman's terms. Like dictionary space compression/projection, anti-language model, reinforcement learning... etc.</summary></entry><entry><title type="html">A deep learning seq2seq model ChatBot in tensorflow</title><link href="http://localhost:4000/tensorflow-seq2seq-chatbot/" rel="alternate" type="text/html" title="A deep learning seq2seq model ChatBot in tensorflow" /><published>2016-10-02T00:00:00+09:00</published><updated>2016-10-02T00:00:00+09:00</updated><id>http://localhost:4000/tensorflow%20seq2seq%20chatbot</id><content type="html" xml:base="http://localhost:4000/tensorflow-seq2seq-chatbot/">&lt;h1 id=&quot;tensorflow-chatbot&quot;&gt;Tensorflow chatbot&lt;/h1&gt;
+&lt;h3 id=&quot;with-seq2seq--attention--dict-compress--beam-search--anti-lm--facebook-messenger-server&quot;&gt;(with seq2seq + attention + dict-compress + beam search + anti-LM + facebook messenger server)&lt;/h3&gt;
+
+&lt;p&gt;Github Repository: &lt;a href=&quot;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm&quot;&gt;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;####[Update 2017-03-14]&lt;/p&gt;
+  &lt;ol&gt;
+    &lt;li&gt;Upgrade to tensorflow v1.0.0, no backward compatible since tensorflow have changed so much.&lt;/li&gt;
+    &lt;li&gt;A pre-trained model with twitter corpus is added, just &lt;code class=&quot;highlighter-rouge&quot;&gt;./go_example&lt;/code&gt; to chat! (or preview my &lt;a href=&quot;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm/blob/master/example_chat.md&quot;&gt;chat example&lt;/a&gt;)&lt;/li&gt;
+    &lt;li&gt;You could start from tracing this &lt;code class=&quot;highlighter-rouge&quot;&gt;go_example&lt;/code&gt; script to know how things work!&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;briefing&quot;&gt;Briefing&lt;/h2&gt;
+&lt;p&gt;This is a &lt;a href=&quot;http://arxiv.org/abs/1406.1078&quot;&gt;seq2seq model&lt;/a&gt; modified from &lt;a href=&quot;https://www.tensorflow.org/versions/r0.10/tutorials/seq2seq/index.html&quot;&gt;tensorflow example&lt;/a&gt;.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;The original tensorflow seq2seq has &lt;a href=&quot;http://arxiv.org/abs/1412.7449&quot;&gt;attention mechanism&lt;/a&gt; implemented out-of-box.&lt;/li&gt;
+  &lt;li&gt;And speedup training by &lt;a href=&quot;https://arxiv.org/pdf/1412.2007v2.pdf&quot;&gt;dictionary space compressing&lt;/a&gt;, then decompressed by projection the embedding while decoding.&lt;/li&gt;
+  &lt;li&gt;This work add option to do &lt;a href=&quot;https://en.wikipedia.org/wiki/Beam_search&quot;&gt;beam search&lt;/a&gt; in decoding procedure, which usually find better, more interesting response.&lt;/li&gt;
+  &lt;li&gt;Added &lt;a href=&quot;https://arxiv.org/abs/1510.03055&quot;&gt;anti-language model&lt;/a&gt; to suppress the generic response problem of intrinsic seq2seq model.&lt;/li&gt;
+  &lt;li&gt;Imeplemented &lt;a href=&quot;https://arxiv.org/abs/1606.01541&quot;&gt;this deep reinforcement learning architecture&lt;/a&gt; as an option to enhence semantic coherence and perplexity of response.&lt;/li&gt;
+  &lt;li&gt;A light weight &lt;a href=&quot;http://flask.pocoo.org/&quot;&gt;Flask&lt;/a&gt; server &lt;code class=&quot;highlighter-rouge&quot;&gt;app.py&lt;/code&gt; is included to be the Facebook Messenger App backend.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;in-laymans-terms&quot;&gt;In Layman’s terms&lt;/h2&gt;
+
+&lt;p&gt;I explained some detail about the features and some implementation tricks &lt;a href=&quot;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm/blob/master/README2.md&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;just-tell-me-how-it-works&quot;&gt;Just tell me how it works&lt;/h2&gt;
+
+&lt;h4 id=&quot;clone-the-repository&quot;&gt;Clone the repository&lt;/h4&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm.git
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;prepare-for-corpus&quot;&gt;Prepare for Corpus&lt;/h4&gt;
+&lt;p&gt;You may find corpus such as twitter chat, open movie subtitle, or ptt forums from &lt;a href=&quot;https://github.com/Marsan-Ma/chat_corpus&quot;&gt;my chat corpus repository&lt;/a&gt;. You need to put it under path like:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tf_chatbot_seq2seq_antilm/works/&amp;lt;YOUR_MODEL_NAME&amp;gt;/data/train/chat.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And hand craft some testing sentences (each sentence per line) in:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tf_chatbot_seq2seq_antilm/works/&amp;lt;YOUR_MODEL_NAME&amp;gt;/data/test/test_set.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;train-the-model&quot;&gt;Train the model&lt;/h4&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;python3 main.py --mode train --model_name &amp;lt;MODEL_NAME&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;run-some-test-example-and-see-the-bot-response&quot;&gt;Run some test example and see the bot response&lt;/h4&gt;
+
+&lt;p&gt;after you trained your model until perplexity under 50 or so, you could do:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;python3 main.py --mode test --model_name &amp;lt;MODEL_NAME&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;[Note!!!] if you put any parameter overwrite in this main.py commmand, be sure to apply both to train and test, or just modify in lib/config.py for failsafe.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;start-your-facebook-messenger-backend-server&quot;&gt;Start your Facebook Messenger backend server&lt;/h2&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;python3 app.py --model_name &amp;lt;MODEL_NAME&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;You may see this &lt;a href=&quot;https://github.com/Marsan-Ma/fb_messenger&quot;&gt;minimum fb_messenger example&lt;/a&gt; for more details like setting up SSL, webhook, and work-arounds for known bug.&lt;/p&gt;
+
+&lt;p&gt;Here’s an interesting comparison: The left conversation enabled beam search with beam = 10, the response is barely better than always “i don’t know”. The right conversation also used beam search and additionally, enabled anti-language model. This supposed to suppress generic response, and the response do seems better.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://raw.githubusercontent.com/Marsan-Ma/tf_chatbot_seq2seq_antilm/master/doc/messenger.png&quot; alt=&quot;messenger.png&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;deep-reinforcement-learning&quot;&gt;Deep reinforcement learning&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;[Update 2017-03-09] Reinforcement learning does not work now, wait for fix.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;If you want some chance to further improve your model, here I implemented a reinforcement learning architecture inspired by &lt;a href=&quot;https://arxiv.org/abs/1606.01541&quot;&gt;Li et al., 2016&lt;/a&gt;. Just enable the reinforce_learn option in &lt;code class=&quot;highlighter-rouge&quot;&gt;config.py&lt;/code&gt;, you might want to add your own rule in &lt;code class=&quot;highlighter-rouge&quot;&gt;step_rf()&lt;/code&gt; function in &lt;code class=&quot;highlighter-rouge&quot;&gt;lib/seq2seq_mode.py&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Note that you should &lt;strong&gt;train in normal mode to get a decent model first!&lt;/strong&gt;, since the reinforcement learning will explore the brave new world with this pre-trained model. It will end up taking forever to improve itself if you start with a bad model.&lt;/p&gt;
+
+&lt;h2 id=&quot;introduction&quot;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;Seq2seq is a great model released by &lt;a href=&quot;http://arxiv.org/abs/1406.1078&quot;&gt;Cho et al., 2014&lt;/a&gt;. At first it’s used to do machine translation, and soon people find that anything about &lt;strong&gt;mapping something to another thing&lt;/strong&gt; could be also achieved by seq2seq model. Chatbot is one of these miracles, where we consider consecutive dialog as some kind of “mapping” relationship.&lt;/p&gt;
+
+&lt;p&gt;Here is the classic intro picture show the seq2seq model architecture, quote from this &lt;a href=&quot;http://googleresearch.blogspot.ru/2015/11/computer-respond-to-this-email.html&quot;&gt;blogpost about gmail auto-reply feature&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://4.bp.blogspot.com/-aArS0l1pjHQ/Vjj71pKAaEI/AAAAAAAAAxE/Nvy1FSbD_Vs/s640/2TFstaticgraphic_alt-01.png&quot;&gt;&lt;img src=&quot;http://4.bp.blogspot.com/-aArS0l1pjHQ/Vjj71pKAaEI/AAAAAAAAAxE/Nvy1FSbD_Vs/s640/2TFstaticgraphic_alt-01.png&quot; alt=&quot;seq2seq&quot; /&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The problem is, so far we haven’t find a better objective function for chatbot. We are still using &lt;a href=&quot;https://en.wikipedia.org/wiki/Maximum_likelihood_estimation&quot;&gt;MLE (maximum likelyhood estimation)&lt;/a&gt;, which is doing good for machine translation, but always generate generic response like “me too”, “I think so”, “I love you” while doing chat.&lt;/p&gt;
+
+&lt;p&gt;These responses are not informative, but they do have large probability — since they tend to appear many times in training corpus. We don’t won’t our chatbot always replying these noncense, so we need to find some way to make our bot more “interesting”, technically speaking, to increase the “perplexity” of reponse.&lt;/p&gt;
+
+&lt;p&gt;Here we reproduce the work of &lt;a href=&quot;http://arxiv.org/pdf/1510.03055v3.pdf&quot;&gt;Li. et al., 2016&lt;/a&gt; try to solve this problem. The main idea is using the same seq2seq model as a language model, to get the candidate words with high probability in each decoding timestamp as a anti-model, then we penalize these words always being high probability for any input. By this anti-model, we could get more special, non-generic, informative response.&lt;/p&gt;
+
+&lt;p&gt;The original work of &lt;a href=&quot;http://arxiv.org/pdf/1510.03055v3.pdf&quot;&gt;Li. et al&lt;/a&gt; use &lt;a href=&quot;http://delivery.acm.org/10.1145/1080000/1075117/p160-och.pdf&quot;&gt;MERT (Och, 2003)&lt;/a&gt; with &lt;a href=&quot;https://en.wikipedia.org/wiki/BLEU&quot;&gt;BLEU&lt;/a&gt; as metrics to find the best probability weighting (the &lt;strong&gt;λ&lt;/strong&gt; and &lt;strong&gt;γ&lt;/strong&gt; in
+&lt;strong&gt;Score(T) = p(T|S) − λU(T) + γNt&lt;/strong&gt;) of the corresponding anti-language model. But I find that BLEU score in chat corpus tend to always being zero, thus can’t get meaningful result here. If anyone has any idea about this, drop me a message, thanks!&lt;/p&gt;
+
+&lt;h2 id=&quot;parameters&quot;&gt;Parameters&lt;/h2&gt;
+
+&lt;p&gt;There are some options to for model training and predicting in lib/config.py. Basically they are self-explained and could work with default value for most of cases. Here we only list something you  need to config:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;About environment&lt;/strong&gt;&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;name&lt;/th&gt;
+      &lt;th&gt;type&lt;/th&gt;
+      &lt;th&gt;Description&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;mode&lt;/td&gt;
+      &lt;td&gt;string&lt;/td&gt;
+      &lt;td&gt;work mode: train/test/chat&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;model_name&lt;/td&gt;
+      &lt;td&gt;string&lt;/td&gt;
+      &lt;td&gt;model name, affects your working path (storing the data, nn_model, result folders)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;scope_name&lt;/td&gt;
+      &lt;td&gt;string&lt;/td&gt;
+      &lt;td&gt;In tensorflow if you need to load two graph at the same time, you need to save/load them in different namespace. (If you need only one seq2seq model, leave it as default)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;vocab_size&lt;/td&gt;
+      &lt;td&gt;integer&lt;/td&gt;
+      &lt;td&gt;depends on your corpus language: for english, 60000 is good enough. For chinese you need at least 100000 or 200000.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;gpu_usage&lt;/td&gt;
+      &lt;td&gt;float&lt;/td&gt;
+      &lt;td&gt;tensorflow gpu memory fraction used, default is 1 and tensorflow will occupy 100% of your GPU. If you have multi jobs sharing your GPU resource, make it 0.5 or 0.3, for 2 or 3 jobs.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;reinforce_learn&lt;/td&gt;
+      &lt;td&gt;int&lt;/td&gt;
+      &lt;td&gt;set 1 to enable reinforcement learning mode&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;strong&gt;About decoding&lt;/strong&gt;&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;name&lt;/th&gt;
+      &lt;th&gt;type&lt;/th&gt;
+      &lt;th&gt;default&lt;/th&gt;
+      &lt;th&gt;Description&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;beam_size&lt;/td&gt;
+      &lt;td&gt;int&lt;/td&gt;
+      &lt;td&gt;10&lt;/td&gt;
+      &lt;td&gt;beam search size, setting 1 equals to greedy search&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;antilm&lt;/td&gt;
+      &lt;td&gt;float&lt;/td&gt;
+      &lt;td&gt;0 (disabled)&lt;/td&gt;
+      &lt;td&gt;punish weight of &lt;a href=&quot;http://arxiv.org/pdf/1510.03055v3.pdf&quot;&gt;anti-language model&lt;/a&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;n_bonus&lt;/td&gt;
+      &lt;td&gt;float&lt;/td&gt;
+      &lt;td&gt;0 (disabled)&lt;/td&gt;
+      &lt;td&gt;reward weight of sentence length&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;The anti-LM functin is disabled by default, you may start from setting antilm=0.5~0.7 and n_bonus=0.05 to see if you like the difference in results.&lt;/p&gt;
+
+&lt;h2 id=&quot;requirements&quot;&gt;Requirements&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;For training, GPU is recommended since seq2seq is a large model, you need certain computing power to do the training and predicting efficiently, especially when you set a large beam-search size.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;DRAM requirement is not strict as CPU/GPU, since we are doing stochastic gradient decent.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;If you are new to deep-learning, setting-up things like GPU, python environment is annoying to you, here are dockers of my machine learning environment:&lt;br /&gt;
+  &lt;a href=&quot;https://github.com/Marsan-Ma/docker_mldm&quot;&gt;(non-gpu version docker)&lt;/a&gt;  /  &lt;a href=&quot;https://github.com/Marsan-Ma/docker_mldm_gpu&quot;&gt;(gpu version docker)&lt;/a&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;p&gt;Seq2seq is a model with many preliminaries, I’ve been spend quite some time surveying and here are some best materials which benefit me a lot:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;The best blogpost explaining RNN, LSTM, GRU and seq2seq model: &lt;a href=&quot;http://colah.github.io/posts/2015-08-Understanding-LSTMs/&quot;&gt;Understanding LSTM Networks&lt;/a&gt; by Christopher Olah.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;This work &lt;a href=&quot;https://github.com/sherjilozair/char-rnn-tensorflow&quot;&gt;sherjilozair/char-rnn-tensorflow&lt;/a&gt; helps me learn a lot about language model and implementation graph in tensorflow.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;If you are interested in more magic about RNN, here is a MUST-READ blogpost: &lt;a href=&quot;http://karpathy.github.io/2015/05/21/rnn-effectiveness/&quot;&gt;The Unreasonable Effectiveness of Recurrent Neural Networks&lt;/a&gt; by Andrej Karpathy.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;The vanilla version seq2seq+attention: &lt;a href=&quot;https://github.com/nicolas-ivanov/tf_seq2seq_chatbot&quot;&gt;nicolas-ivanov/tf_seq2seq_chatbot&lt;/a&gt;. This will help you figure out the main flow of vanilla seq2seq model, and I build this repository based on this work.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;todos&quot;&gt;TODOs&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Currently I build beam-search out of graph, which means — it’s very slow. There are discussions about build it in-graph &lt;a href=&quot;https://github.com/tensorflow/tensorflow/issues/654#issuecomment-196168030&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;https://github.com/tensorflow/tensorflow/pull/3756&quot;&gt;there&lt;/a&gt;. But unfortunately if you want add something more than beam-search, like this anti-LM work, you need much more than just beam search to be in-graph.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;I haven’t figure out how the MERT with BLEU can optimize weight of anti-LM model, since currently the BLEU is often being zero.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</content><author><name></name></author><category term="chatbot" /><category term="deep learning" /><category term="neural network" /><category term="rnn" /><summary type="html">A deep-learning chatbot with (seq2seq model + attention mechanism + beam_search algorithm + anti-language model) in tensorflow, works end-to-end from training corpus to chat model, and build-in a facebook-messenger backend server.</summary></entry><entry><title type="html">Twitter stream scraper</title><link href="http://localhost:4000/twitter-stream-scraper/" rel="alternate" type="text/html" title="Twitter stream scraper" /><published>2016-09-17T00:00:00+09:00</published><updated>2016-09-17T00:00:00+09:00</updated><id>http://localhost:4000/twitter%20stream%20scraper</id><content type="html" xml:base="http://localhost:4000/twitter-stream-scraper/">&lt;h1 id=&quot;twitter-scraper&quot;&gt;Twitter Scraper&lt;/h1&gt;
+
+&lt;p&gt;Github Repository: &lt;a href=&quot;https://github.com/Marsan-Ma/twitter_scraper&quot;&gt;https://github.com/Marsan-Ma/twitter_scraper&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Scraping twitter content from &lt;a href=&quot;https://dev.twitter.com/streaming/overview&quot;&gt;twitter streaming API&lt;/a&gt;, in python3. The output is used as the training corpus for my &lt;a href=&quot;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm&quot;&gt;&lt;strong&gt;ChatBot&lt;/strong&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-it-works&quot;&gt;How it works&lt;/h2&gt;
+
+&lt;h3 id=&quot;setup&quot;&gt;Setup&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Copy the &lt;code class=&quot;highlighter-rouge&quot;&gt;config.yml.default&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;config.yml&lt;/code&gt;, and fill your twitter application tokens you got from &lt;a href=&quot;https://apps.twitter.com/&quot;&gt;twitter developers&lt;/a&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;just type    &lt;code class=&quot;highlighter-rouge&quot;&gt;python3 twitter.py&lt;/code&gt;, the listener will start to dump corpus in: &lt;code class=&quot;highlighter-rouge&quot;&gt;corpus/&amp;lt;YYYYMMDD_HHMMSS.txt&amp;gt;&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;output&quot;&gt;Output&lt;/h3&gt;
+
+&lt;p&gt;I build this corpus for training the neural network model &lt;a href=&quot;https://github.com/Marsan-Ma/tf_chatbot_seq2seq_antilm&quot;&gt;&lt;strong&gt;ChatBot&lt;/strong&gt;&lt;/a&gt;, thus the corpus is arranged as consecutive dialog where even sentences are the response of odd sentences, like:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Line number&lt;/th&gt;
+      &lt;th&gt;Sentences&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;happy birthday!&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt;thank you :)&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt;game of throne is the best drama i’ve seen.&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;4&lt;/td&gt;
+      &lt;td&gt;I’ll say the walking dead is even better.&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Where (1,2), (3,4) are two independent dialog pairs.&lt;/p&gt;
+
+&lt;h2 id=&quot;content-filters&quot;&gt;Content Filters&lt;/h2&gt;
+
+&lt;p&gt;Twitter streaming API supports &lt;a href=&quot;https://dev.twitter.com/streaming/overview/request-parameters&quot;&gt;some filter&lt;/a&gt;, and the most useful  ones are:&lt;/p&gt;
+
+&lt;h3 id=&quot;location-filter&quot;&gt;Location filter&lt;/h3&gt;
+
+&lt;p&gt;simply place the logitude and altitude in [South,West,North,East] format, for example:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Place&lt;/th&gt;
+      &lt;th&gt;filter&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;San Francisco&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream.filter(locations=[-122.75,36.8,-121.75,37.8])&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;New York City&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream.filter([-74,40,-73,41])&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;San Francisco or New York City&lt;/td&gt;
+      &lt;td&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream.filter([-122.75,36.8,-121.75,37.8, -74,40,-73,41])&lt;/code&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;language-filter&quot;&gt;Language filter&lt;/h3&gt;
+
+&lt;p&gt;there are threads questioning about &lt;code class=&quot;highlighter-rouge&quot;&gt;language&lt;/code&gt; filter is not work, actually is does, it just need to accompanied with &lt;code class=&quot;highlighter-rouge&quot;&gt;track&lt;/code&gt; filter, like:&lt;/p&gt;
+
+&lt;p&gt;This won’t work.
+&lt;code class=&quot;highlighter-rouge&quot;&gt;stream.filter(languages=[&quot;en&quot;])&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;This works.
+&lt;code class=&quot;highlighter-rouge&quot;&gt;stream.filter(languages=[&quot;en&quot;], track=['machine', 'learning'])&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;if-you-want-language-other-than-english&quot;&gt;If you want language other than English&lt;/h3&gt;
+
+&lt;p&gt;Twitter can’t tokenize some languages like Japanese or Chinese correctly, your &lt;code class=&quot;highlighter-rouge&quot;&gt;track&lt;/code&gt; parameter won’t work for these languages. For example, you might setup:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream.filter(languages=[&quot;ja&quot;], track=['バイト'])&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;While you expect you will get a lot of tweets about &lt;strong&gt;バイト&lt;/strong&gt;, but you simply can’t get it, because twitter can’t tokenize Japenses and Chinese correctly.&lt;/p&gt;
+
+&lt;p&gt;If you just want some corpus, regardless of the topics, here are the &lt;strong&gt;work around&lt;/strong&gt;: use some generic English keywords instead, like:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;stream.filter(languages=[&quot;zh&quot;], track=['I', 'you', 'http', 'www', '@', '。', '，', '！', '』', ')', '...', '-', '/'])&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;According to document, you could add up to 400 keywords on this list, even some emoji also works.&lt;/p&gt;</content><author><name></name></author><category term="scraper" /><category term="corpus" /><category term="chatbot" /><summary type="html">Scraping twitter content from twitter streaming API, in python3.</summary></entry><entry><title type="html">A minimum facebook messenger backend in python flask</title><link href="http://localhost:4000/a-minimum-facebook-messenger-python-flask-backend/" rel="alternate" type="text/html" title="A minimum facebook messenger backend in python flask" /><published>2016-09-10T00:00:00+09:00</published><updated>2016-09-10T00:00:00+09:00</updated><id>http://localhost:4000/a%20minimum%20facebook%20messenger%20python%20flask%20backend</id><content type="html" xml:base="http://localhost:4000/a-minimum-facebook-messenger-python-flask-backend/">&lt;h1 id=&quot;minimum-facebook-chatbot-app&quot;&gt;Minimum Facebook ChatBot App&lt;/h1&gt;
+
+&lt;p&gt;A facebook chatbot (messenger) backend server, written in python flask framework. See my &lt;a href=&quot;https://github.com/Marsan-Ma/fb_messenger&quot;&gt;Github Repository&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;deploy-steps&quot;&gt;Deploy Steps&lt;/h2&gt;
+
+&lt;p&gt;Take a glimpse on &lt;a href=&quot;https://developers.facebook.com/docs/messenger-platform/quickstart&quot;&gt;facebook official tutorial&lt;/a&gt;, then start wondering:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;How to get some free and workable SSL certificate?&lt;/li&gt;
+  &lt;li&gt;What the heck about these tokens?&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;free-workable-ssl-certification&quot;&gt;Free Workable SSL certification!&lt;/h2&gt;
+
+&lt;p&gt;Facebook don’t accept self-signed SSL key, but SSL certificate from trusted source is not free, usually like $50/yr at least.&lt;/p&gt;
+
+&lt;p&gt;Thanks to guys from &lt;a href=&quot;https://letsencrypt.org/isrg/&quot;&gt;ISRG (Internet Security Research Group)&lt;/a&gt;, we have &lt;a href=&quot;https://letsencrypt.org/&quot;&gt;free ssl certificate&lt;/a&gt; that accepted by main-stream browsers, and most important — accepted by Facebook!&lt;/p&gt;
+
+&lt;p&gt;You could follow the official tutorial from &lt;a href=&quot;https://letsencrypt.org/getting-started/&quot;&gt;let’s encrypt&lt;/a&gt;, or inshort, just type:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  wget https://dl.eff.org/certbot-auto
+  chmod a+x certbot-auto
+  ./certbot-auto certonly --standalone -d &amp;lt;your.domain.name&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then your keys are available in &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/letsencrypt/live&lt;/code&gt;, yay!
+(Note that port 443 (https) should not blocked by firewall, else can’t be verified.)&lt;/p&gt;
+
+&lt;p&gt;Then you need to copy this two key file into you ssl folder:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cp /etc/letsencrypt/live/fullchain1.pem  fb_messenger/ssl/server.crt
+cp /etc/letsencrypt/live/privkey1.pem  fb_messenger/ssl/server.key
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;creating-facebook-app-and-the-tokens&quot;&gt;Creating Facebook App, and the Tokens&lt;/h2&gt;
+
+&lt;p&gt;There are two tokens matters here:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;VERIFY_TOKEN&lt;/code&gt; for facebook to verify that &lt;strong&gt;YOU OWN THE DOMAIN&lt;/strong&gt;, this token will only used once. And you will fill-in whatever you like in this step:
+&lt;img src=&quot;https://scontent-tpe1-1.xx.fbcdn.net/t39.2178-6/12057143_211110782612505_894181129_n.png&quot; alt=&quot;the VERIFY_TOKEN&quot; /&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;And you will fill the same in &lt;code class=&quot;highlighter-rouge&quot;&gt;config.yaml&lt;/code&gt;
+You can’t pass the &lt;code class=&quot;highlighter-rouge&quot;&gt;Verify and Save&lt;/code&gt; button because once you click it, facebook will try to access your site and make sure:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;you have SSL certificate ready&lt;/li&gt;
+  &lt;li&gt;you have token setup ready&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;We will come back later and click this darn button later, after we settle everything…&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;FACEBOOK_TOKEN&lt;/code&gt; for sending message on behalf of your certain facebook fanpage, which you get it from this step:
+&lt;img src=&quot;https://scontent-tpe1-1.xx.fbcdn.net/t39.2178-6/12995543_1164810200226522_2093336718_n.png&quot; alt=&quot;the FACEBOOK_TOKEN&quot; /&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Also, you will fill the same in &lt;code class=&quot;highlighter-rouge&quot;&gt;config.yaml&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;finally-start-your-server&quot;&gt;Finally, start your server!&lt;/h2&gt;
+
+&lt;p&gt;You need to start your server by &lt;code class=&quot;highlighter-rouge&quot;&gt;python3 app.py&lt;/code&gt;, and make sure it’s public accessible by Facebook to verify your SSL is working!&lt;/p&gt;
+
+&lt;p&gt;Now we could go back to the &lt;strong&gt;webhook&lt;/strong&gt; part, click this &lt;code class=&quot;highlighter-rouge&quot;&gt;Verify and Save&lt;/code&gt; button and see it done!&lt;/p&gt;
+
+&lt;h4 id=&quot;enjoy-the-chatting-with-your-bot&quot;&gt;Enjoy the chatting with your bot!&lt;/h4&gt;</content><author><name></name></author><category term="chatbot" /><category term="facebook" /><category term="messenger" /><summary type="html">A minimum facebook messenger backend in python flask, with a much simpler guide through how to create your facebook messenger app and setup!</summary></entry><entry><title type="html">Docker for deep learning</title><link href="http://localhost:4000/docker-for-deep-learning/" rel="alternate" type="text/html" title="Docker for deep learning" /><published>2016-09-01T00:00:00+09:00</published><updated>2016-09-01T00:00:00+09:00</updated><id>http://localhost:4000/docker%20for%20deep%20learning</id><content type="html" xml:base="http://localhost:4000/docker-for-deep-learning/">&lt;h1 id=&quot;briefing&quot;&gt;Briefing&lt;/h1&gt;
+
+&lt;p&gt;Solving all the dependencies for environment setup is frustrating, so here is my workhorse docker containers that I maintained on my job. Here is the &lt;a href=&quot;https://github.com/Marsan-Ma/docker_mldm&quot;&gt;Github Repository&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://github.com/Marsan-Ma/docker_mldm_gpu&quot;&gt;GPU supported one&lt;/a&gt; is more active since I have machines with GPU (amazon G series instances). I also make &lt;a href=&quot;https://github.com/Marsan-Ma/docker_mldm&quot;&gt;a non-GPU version&lt;/a&gt; for cases that I need to deploy smaller projects in cheaper machines.&lt;/p&gt;
+
+&lt;p&gt;Both of them include some other machine learning and must-have tools if you are working with data, machine learning and web.&lt;/p&gt;
+
+&lt;h1 id=&quot;how-to-use&quot;&gt;How to use&lt;/h1&gt;
+
+&lt;p&gt;Basically both repositories are almost the same, there will be three files:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;0-prepare-host.sh&lt;/strong&gt;
+install docker, nvidia driver, nvidia-docker in your host machine.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;1-build-mldm.sh&lt;/strong&gt;
+build my machine learning toolbelt container
+here I choose &lt;strong&gt;tensorflow gpu supported version&lt;/strong&gt; for deep learning, you may append whatever you like in Dockerfile!&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;2-start-mldm.sh&lt;/strong&gt;
+start the container with some environment setup script, with ipython notebook in http://&lt;your_machine&gt;:8888&lt;/your_machine&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Enjoy!&lt;/p&gt;</content><author><name></name></author><category term="deep learning" /><category term="machine learning" /><category term="docker" /><summary type="html">Docker containers for machine learning and deep learning GPU support.</summary></entry><entry><title type="html">Facebook Challenge: predicting user checkings</title><link href="http://localhost:4000/facebook-challenge-predict-checkins/" rel="alternate" type="text/html" title="Facebook Challenge: predicting user checkings" /><published>2016-07-13T00:00:00+09:00</published><updated>2016-07-13T00:00:00+09:00</updated><id>http://localhost:4000/facebook%20challenge%20predict%20checkins</id><content type="html" xml:base="http://localhost:4000/facebook-challenge-predict-checkins/">&lt;h2 id=&quot;facebook-challenge-predicting-user-checkings&quot;&gt;Facebook challenge: predicting user checkings&lt;/h2&gt;
+&lt;p&gt;This is the code I participated in the Facebook Challenge, see the Github repository:&lt;br /&gt;
+&lt;a href=&quot;https://github.com/Marsan-Ma/checkins&quot;&gt;https://github.com/Marsan-Ma/checkins&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The goal of this competition is to predict which place a person would like to check into. For the purposes of this competition, Facebook released 40M check-in data of a small city, and our task is to predict the most likely check-in places of 8M user samples.&lt;/p&gt;
+
+&lt;p&gt;Since the dataset of this competition is in a huge scale, it’s far more than just pushing predicting the ability of our machine learning algorithm. It also challenging us about how to deal with such a huge scale data. I’ve developed a lot of new tricks on dividing the question size without losing too much predicting accuracy, and speed-up, parallelize every code detail.&lt;/p&gt;
+
+&lt;h2 id=&quot;modules&quot;&gt;modules&lt;/h2&gt;
+
+&lt;h3 id=&quot;the-main-modules&quot;&gt;The main modules&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;parser.py&lt;/strong&gt;
+  parse in the raw data, split into training/validation/testing, also doing most of data pre-processing.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;trainer.py&lt;/strong&gt;
+  training models according to selected algorithm and parameters.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;evaluator.py&lt;/strong&gt;
+  do data post-processing if enabled, evaluate trained models, and generate submittion file.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;submiter.py&lt;/strong&gt;
+  programmatically submit to kaggle website.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;wrappers&quot;&gt;wrappers&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;main.py&lt;/strong&gt;
+  wrapper for above modules, all hyper-parameters and experiments are handled here.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;blending.py&lt;/strong&gt;
+  do the blending among best models, generate blending model results.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;grouper.py&lt;/strong&gt;
+use tsne and knn results as extra inputs of training models.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;conventions.py&lt;/strong&gt;
+some convention functions handling time format and dataframe&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;tracing-the-code&quot;&gt;Tracing the code&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;top script entrance: go_train, everything start here!&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;main.py being the wrapper, it host all kinds of experiment configuration and kick-off.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;all the modules are in folder: ./lib&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</content><author><name></name></author><category term="machine learning" /><category term="random forest" /><category term="blending model" /><category term="kaggle" /><category term="facebook" /><summary type="html">My code for Facebook Challenge: &quot;predicting user checkings&quot;. The goal of this competition is to predict which place a person would like to check into. For the purposes of this competition, Facebook released 40M check-in data of a small city, and our task is to predict the most likely check-in places of 8M user samples.</summary></entry><entry><title type="html">Dato Challenge: native ad classifier</title><link href="http://localhost:4000/dato-challenge-native-ad-classifier/" rel="alternate" type="text/html" title="Dato Challenge: native ad classifier" /><published>2015-08-15T00:00:00+09:00</published><updated>2015-08-15T00:00:00+09:00</updated><id>http://localhost:4000/dato%20challenge%20native%20ad%20classifier</id><content type="html" xml:base="http://localhost:4000/dato-challenge-native-ad-classifier/">&lt;h1 id=&quot;truly-native&quot;&gt;“Truly Native?”&lt;/h1&gt;
+
+&lt;p&gt;My code doing the &lt;a href=&quot;https://www.kaggle.com/c/dato-native&quot;&gt;Data Kaggle challenge&lt;/a&gt;: Here is the &lt;a href=&quot;https://github.com/Marsan-Ma/tnative&quot;&gt;Github repository&lt;/a&gt; of this work.&lt;/p&gt;
+
+&lt;h3 id=&quot;briefing&quot;&gt;Briefing&lt;/h3&gt;
+
+&lt;p&gt;In this challenge, we are requested to develop a system predicting whether an article is a native advertisement. It’s involves lots of natural language processing tricks, like boilerplate removing, topic modeling and embedding techniques. My final model is a blending of several bagging logistic regression, two gradient boost trees, and two field-aware factorized machine, which achieved 0.974 AUC in private board. (while 1st prize winner achieves 0.998). &lt;/p&gt;
+
+&lt;h3 id=&quot;code-hierarchy&quot;&gt;Code Hierarchy&lt;/h3&gt;
+
+&lt;p&gt;The entry script is &lt;a href=&quot;https://github.com/Marsan-Ma/tnative/blob/master/go_parse.sh&quot;&gt;go_parse.sh&lt;/a&gt; and &lt;a href=&quot;https://github.com/Marsan-Ma/tnative/blob/master/go_train.sh&quot;&gt;go_train.sh&lt;/a&gt;, every thing start with these two. While the former is used to parse data into mongodb and latter do the model training and evaluation.&lt;/p&gt;
+
+&lt;p&gt;There are a couple of different models to choose, and feature selection, blending, hyperparameter searching experiments which you could choose the function and tune the setting in &lt;a href=&quot;https://github.com/Marsan-Ma/tnative/blob/master/main.py&quot;&gt;main.py&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;about-dataflow&quot;&gt;About dataflow&lt;/h3&gt;
+
+&lt;p&gt;Here I tried to separate data pipelines into independent stages. Like, you could change input data format without refactoring the learning models or evaluation stages, and vice versa. Senior Kagglers might find this project get an overkill big structure, that’s because this framework try to become a generic framework for any kinds of data science products.&lt;/p&gt;</content><author><name></name></author><category term="machine learning" /><category term="logistic regression" /><category term="random forest" /><category term="svm" /><category term="blending model" /><category term="kaggle" /><category term="dato" /><summary type="html">It's my code doing the Data Kaggle challenge. In this challenge, we are requested to develop a system predicting whether an article is a native advertisement. It’s involves lots of natural language processing tricks, like boilerplate removing, topic modeling and embedding techniques.</summary></entry><entry><title type="html">Coconut CMS</title><link href="http://localhost:4000/coconut-a-ruby-on-rails-content-management-platform/" rel="alternate" type="text/html" title="Coconut CMS" /><published>2015-08-01T00:00:00+09:00</published><updated>2015-08-01T00:00:00+09:00</updated><id>http://localhost:4000/coconut%20-%20a%20ruby%20on%20rails%20content%20management%20platform</id><content type="html" xml:base="http://localhost:4000/coconut-a-ruby-on-rails-content-management-platform/">&lt;h1 id=&quot;coconuts-cms&quot;&gt;Coconuts CMS&lt;/h1&gt;
+
+&lt;p&gt;It’s a content management platform in Ruby on Rails, the repository:&lt;br /&gt;
+&lt;a href=&quot;https://github.com/Marsan-Ma/coconuts&quot;&gt;https://github.com/Marsan-Ma/coconuts&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;part-0--environment-setup-problem&quot;&gt;Part 0 : Environment setup problem&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;bundle install problem: mysql.h is missing, solution:&lt;br /&gt;
+ &lt;a href=&quot;http://stackoverflow.com/questions/5919727/bundle-install-problem-mysql-h-is-missing&quot;&gt;http://stackoverflow.com/questions/5919727/bundle-install-problem-mysql-h-is-missing&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;part-1--server-boot-up-problem&quot;&gt;Part 1 : Server boot-up problem&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Nginx not auto start-up problem
+=&amp;gt; port 80 blocked by apache2 by default, see &lt;code class=&quot;highlighter-rouge&quot;&gt;ps ax | grep apache2&lt;/code&gt;
+=&amp;gt; modify &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/apache2/ports.conf&lt;/code&gt; and delete &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/apache2/sites-enabled/000-default&lt;/code&gt;
+=&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo update-rc.d nginx defaults&lt;/code&gt; to add service to auto-start list
+=&amp;gt; if do not want to reboot, kill apache process by ‘sudo kill -9 &lt;pid&gt;' then 'sudo service nginx start'&lt;/pid&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Sidekiq auto start-up # (X: not yet success …)
+=&amp;gt; download sidekiq.conf &amp;amp; workers.conf from &lt;a href=&quot;https://github.com/mperham/sidekiq/tree/master/examples/upstart&quot;&gt;https://github.com/mperham/sidekiq/tree/master/examples/upstart&lt;/a&gt;
+=&amp;gt; move them to &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/init.d/sidekiq&lt;/code&gt; &amp;amp; &lt;code class=&quot;highlighter-rouge&quot;&gt;/etc/init.d/workers&lt;/code&gt;, then &lt;code class=&quot;highlighter-rouge&quot;&gt;sudo update-rc.d _____ defaults&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;part-2--background-tasks-sidekiq--redis--whenever&quot;&gt;Part 2 : Background tasks (Sidekiq + Redis + Whenever)&lt;/h2&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sidekiq&lt;/code&gt;       # start sidekiq, or ‘bundle exec sidekiq … -L log/sidekiq.log &amp;amp;’, add   ‘xvfb-run’ in front while at cloud server, see part 3&lt;br /&gt;
+&lt;code class=&quot;highlighter-rouge&quot;&gt;whenever -i&lt;/code&gt;   # reload scheduled task settings&lt;br /&gt;
+&lt;code class=&quot;highlighter-rouge&quot;&gt;crontab -e&lt;/code&gt;    # edit unix cron-tab for scheduled tasks&lt;br /&gt;
+config in &lt;code class=&quot;highlighter-rouge&quot;&gt;config/sidekiq.yml&lt;/code&gt; &amp;amp; &lt;code class=&quot;highlighter-rouge&quot;&gt;config/schedule.rb&lt;/code&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Job queue but not processed =&amp;gt; sidekiq haven’t start.&lt;/li&gt;
+  &lt;li&gt;Job failed =&amp;gt; user password error / 
+              wordpress json-api create-post not enabled / 
+              db host not grant access /&lt;/li&gt;
+  &lt;li&gt;Redis-server has not enabled / check by &lt;code class=&quot;highlighter-rouge&quot;&gt;redis-cli ping&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;try flushall redis-cli keys, or directly edit crontab, remove unused one.&lt;/li&gt;
+  &lt;li&gt;add in &lt;code class=&quot;highlighter-rouge&quot;&gt;config/schedule.rb&lt;/code&gt; =&amp;gt; set &lt;code class=&quot;highlighter-rouge&quot;&gt;:job_template, &quot;bash -l -i -c ':job'&quot;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;don’t leave any ‘puts’ in background script, will cause error while no login shell.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;part-3--about-capybara-the-pseudo-browser&quot;&gt;Part 3 : About Capybara, the pseudo browser&lt;/h2&gt;
+
+&lt;h4 id=&quot;qt-packages-needed&quot;&gt;QT packages needed&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install libqt4-dev libqtwebkit-dev&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&quot;in-cloud-server-for-solving-no-display-session-problem&quot;&gt;in cloud server, for solving no display session problem&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;sudo apt-get install xvfb libicu48&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id=&quot;than-add-this-lin-export-displaylocalhost10-in-bash_profile-and-start-any-command-need-display-session-by-xvfb-run&quot;&gt;than add this lin &lt;code class=&quot;highlighter-rouge&quot;&gt;export DISPLAY=localhost:1.0&lt;/code&gt; in &lt;code class=&quot;highlighter-rouge&quot;&gt;~/.bash_profile&lt;/code&gt; and start any command need display session by &lt;code class=&quot;highlighter-rouge&quot;&gt;xvfb-run&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;Ex: ‘xvfb-run bundle exec sidekiq … -L log/sidekiq.log &amp;amp;’&lt;/p&gt;
+
+&lt;h2 id=&quot;part-4--mongoid--redis-database-backup-and-feedback&quot;&gt;Part 4 : Mongoid &amp;amp; Redis Database backup and feedback&lt;/h2&gt;
+
+&lt;h4 id=&quot;mongoid-database&quot;&gt;MONGOID database&lt;/h4&gt;
+
+&lt;h4 id=&quot;dump-selected-database-in-current-path&quot;&gt;Dump selected database in current path&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;mongodump --db &amp;lt;db_name&amp;gt;&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;drop-database-to-clean-all&quot;&gt;Drop database to clean all&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;mongo &amp;lt;db_name&amp;gt; --eval &quot;db.dropDatabase()&quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;recover-selected-database-from-assigned-path&quot;&gt;Recover selected database from assigned path&lt;/h4&gt;
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;mongorestore --db &amp;lt;db_name&amp;gt; ./dump/&amp;lt;db_name&amp;gt;/&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;redis-database&quot;&gt;REDIS database&lt;/h4&gt;
+&lt;p&gt;Dump redis all (need Gem redis-dump)
+&lt;code class=&quot;highlighter-rouge&quot;&gt;redis-dump &amp;gt; ./dump/&amp;lt;db_name&amp;gt;_redis.json&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Clean all
+&lt;code class=&quot;highlighter-rouge&quot;&gt;redis-cli flushall&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Restore from json
+&lt;code class=&quot;highlighter-rouge&quot;&gt;cat ./dump/&amp;lt;db_name&amp;gt;_redis.json | redis-load&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;redis-on-mac&quot;&gt;Redis on MAC&lt;/h4&gt;
+&lt;p&gt;To have launchd start redis at login:&lt;br /&gt;
+    &lt;code class=&quot;highlighter-rouge&quot;&gt;ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents&lt;/code&gt;&lt;br /&gt;
+Then to load redis now:&lt;br /&gt;
+    &lt;code class=&quot;highlighter-rouge&quot;&gt;launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist&lt;/code&gt;&lt;br /&gt;
+Or, if you don’t want/need launchctl, you can just run:&lt;br /&gt;
+    &lt;code class=&quot;highlighter-rouge&quot;&gt;redis-server /usr/local/etc/redis.conf&lt;/code&gt;&lt;/p&gt;</content><author><name></name></author><category term="machine learning" /><category term="logistic regression" /><category term="random forest" /><category term="svm" /><category term="blending model" /><category term="kaggle" /><category term="facebook" /><summary type="html">My content management system written in Ruby on Rails</summary></entry></feed>
